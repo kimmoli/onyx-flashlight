@@ -50,8 +50,3 @@ desktop-file-install --delete-original \
 %{_datadir}/%{name}/qml
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/86x86/apps/%{name}.png
-%config %{_sysconfdir}/udev/rules.d/
-
-%post
-udevadm control --reload
-udevadm trigger
