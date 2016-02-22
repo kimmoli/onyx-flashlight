@@ -29,6 +29,11 @@ int main(int argc, char *argv[])
     QScopedPointer<QQuickView> view(SailfishApp::createView());
 
     Torch *t = new Torch();
+
+    t->setProperty("brightness", 1);
+    t->setProperty("interval", 200);
+    t->setProperty("torchState", false);
+    t->setProperty("stroboState", false);
     view->rootContext()->setContextProperty("Torch", t);
 
     view->setSource(SailfishApp::pathTo("qml/flashlight.qml"));

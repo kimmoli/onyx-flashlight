@@ -5,32 +5,6 @@ Page
 {
     id: page
 
-    property bool torchIsOn: false
-    property int brightness: 1
-
-    property bool stroboIsOn: false
-    property int interval: 200
-
-    onBrightnessChanged:
-    {
-        Torch.set(torchIsOn, stroboIsOn, brightness, interval)
-    }
-
-    onIntervalChanged:
-    {
-        Torch.set(torchIsOn, stroboIsOn, brightness, interval)
-    }
-
-    onTorchIsOnChanged:
-    {
-        Torch.set(torchIsOn, stroboIsOn, brightness, interval)
-    }
-
-    onStroboIsOnChanged:
-    {
-        Torch.set(torchIsOn, stroboIsOn, brightness, interval)
-    }
-
     SilicaFlickable
     {
         anchors.fill: parent
@@ -63,16 +37,16 @@ Page
             Button
             {
                 anchors.horizontalCenter: parent.horizontalCenter
-                enabled: !stroboIsOn
-                text: torchIsOn ? "Off" : "On"
-                onClicked: torchIsOn = !torchIsOn
+                enabled: !Torch.stroboState
+                text: Torch.torchState ? "Off" : "On"
+                onClicked: Torch.torchState = !Torch.torchState
             }
             Button
             {
                 anchors.horizontalCenter: parent.horizontalCenter
-                enabled: !torchIsOn
+                enabled: !Torch.torchState
                 text: "Strobo"
-                onClicked: stroboIsOn = !stroboIsOn
+                onClicked: Torch.stroboState = !Torch.stroboState
             }
             Slider
             {
@@ -82,9 +56,9 @@ Page
                 valueText: value
                 minimumValue: 1
                 maximumValue: 400
-                value: brightness
+                value: Torch.brightness
                 stepSize: 1
-                onValueChanged: brightness = value
+                onValueChanged: Torch.brightness = value
             }
             Slider
             {
@@ -94,9 +68,9 @@ Page
                 valueText: value
                 minimumValue: 20
                 maximumValue: 500
-                value: interval
+                value: Torch.interval
                 stepSize: 1
-                onValueChanged: interval = value
+                onValueChanged: Torch.interval = value
             }
         }
     }
