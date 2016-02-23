@@ -18,6 +18,11 @@ Torch::Torch(QObject *parent) :
 
 void Torch::setTorchState(bool val)
 {
+    if(m_stroboisOn)
+    {
+        setStroboState(false);
+    }
+    
     if(!val)
     {
         p_brightness(0);
