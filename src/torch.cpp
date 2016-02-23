@@ -6,6 +6,7 @@
 Torch::Torch(QObject *parent) :
     QObject(parent)
 {
+
     strobotimer = new QTimer();
     strobotimer->setSingleShot(false);
 
@@ -15,31 +16,85 @@ Torch::Torch(QObject *parent) :
     strobostate = false;
 }
 
-void Torch::set(bool torchOn, bool stroboOn, int level, int interval)
+void Torch::setTorchState(bool val)
 {
-    if (stroboOn)
+    if(m_stroboisOn)
     {
-        strobotimer->setInterval(interval);
-        strobotimer->start();
+        setStroboState(false);
     }
-    else
-    {
-        strobotimer->stop();
-        strobostate = false;
-    }
-
-    if (torchOn)
-    {
-        p_brightness(level);
-    }
-    else
+    
+    if(!val)
     {
         p_brightness(0);
+        m_torchIsOn = false;
+        Q_EMIT torchStateChanged(false);
+    }else
+    {
+        p_brightness(m_brightness);
+        m_torchIsOn = true;
+        Q_EMIT torchStateChanged(false);
+
+
+        if(m_brightness > 0)
+        {
+            lastBrightness = m_brightness;
+        }
+    }
+}
+
+bool Torch::getTorchState()
+{
+    return m_torchIsOn;
+}
+
+void Torch::setStroboState(bool val)
+{
+    if(!val)
+    {
+        strobotimer->stop();
+        m_stroboisOn = false;
+        p_brightness(0);
+        Q_EMIT stroboStateChanged(false);
+    }
+    else
+    {
+        strobotimer->setInterval(m_interval);
+        strobotimer->start();
+        m_stroboisOn = true;
+        Q_EMIT stroboStateChanged(true);
+
+        if(m_brightness > 0)
+        {
+            lastBrightness = m_brightness;
+        }
+    }
+}
+
+bool Torch::getStroboState()
+{
+    return m_stroboisOn;
+}
+
+void Torch::setBrightness(int val)
+{
+    m_brightness = val;
+    if(this->getStroboState())
+    {
+        setStroboState(true);
+    }
+    if(this->getTorchState())
+    {
+        setTorchState(true);
     }
 
-    if (level > 0 )
+}
+
+void Torch::setIntervall(int val)
+{
+    m_interval = val;
+    if(this->getStroboState())
     {
-        lastBrightness = level;
+        setStroboState(true);
     }
 }
 
