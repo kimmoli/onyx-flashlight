@@ -45,6 +45,11 @@ desktop-file-install --delete-original \
   --dir %{buildroot}%{_datadir}/applications \
    %{buildroot}%{_datadir}/applications/*.desktop
 
+%pre
+if [ -e "/sys/class/leds/torch-light0/brightness" ]; then
+  chmod 666 /sys/class/leds/torch-light0/brightness
+fi
+
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}

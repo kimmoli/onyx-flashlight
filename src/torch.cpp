@@ -210,10 +210,17 @@ void Torch::checkDevice()
 
         res = true;
     }
-    else if (m_deviceName == "fp2-sibon")
+    else if (m_deviceName == "fp2-sibon") /* Fairphone 2 */
     {
         m_hasBrightness = true;
         m_controlPath = "/sys/class/leds/led:flash_torch/brightness";
+
+        res = true;
+    }
+    else if (m_deviceName == "JP-1601") /* Jolla C */
+    {
+        m_hasBrightness = true;
+        m_controlPath = "/sys/class/leds/torch-light0/brightness";
 
         res = true;
     }
