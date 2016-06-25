@@ -50,6 +50,7 @@ Page
             }
             Slider
             {
+                visible: Torch.hasBrightness
                 width: parent.width - 2*Theme.paddingLarge
                 anchors.horizontalCenter: parent.horizontalCenter
                 label: "Brightness"
@@ -71,6 +72,14 @@ Page
                 value: Torch.interval
                 stepSize: 1
                 onValueChanged: Torch.interval = value
+            }
+            Label
+            {
+                visible: !Torch.deviceSupported
+                width: parent.width - Theme.paddingLarge
+                anchors.horizontalCenter: parent.horizontalCenter
+                wrapMode: Text.Wrap
+                text: "Your device " + Torch.deviceName + " might not be supported."
             }
         }
     }

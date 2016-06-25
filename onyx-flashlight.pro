@@ -5,6 +5,7 @@
 TARGET = onyx-flashlight
 
 CONFIG += sailfishapp
+QT += dbus
 
 DEFINES += "APPVERSION=\\\"$${SPECVERSION}\\\""
 

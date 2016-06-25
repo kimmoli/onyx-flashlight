@@ -2,10 +2,17 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <QDebug>
 
 Torch::Torch(QObject *parent) :
     QObject(parent)
 {
+    m_deviceName = "";
+    m_deviceSupported = false;
+    m_hasBrightness = true;
+    m_controlPath = "/sys/class/leds/led:flash_torch/brightness";
+
+    checkDevice();
 
     strobotimer = new QTimer();
     strobotimer->setSingleShot(false);
@@ -75,6 +82,36 @@ bool Torch::getStroboState()
     return m_stroboisOn;
 }
 
+void Torch::setHasBrightness(bool has)
+{
+    m_hasBrightness = has;
+}
+
+bool Torch::getHasBrightness()
+{
+    return m_hasBrightness;
+}
+
+bool Torch::getDeviceSupported()
+{
+    return m_deviceSupported;
+}
+
+void Torch::setDeviceSupported(bool supported)
+{
+    m_deviceSupported = supported;
+}
+
+QString Torch::getDeviceName()
+{
+    return m_deviceName;
+}
+
+void Torch::setDeviceName(QString name)
+{
+    m_deviceName = name;
+}
+
 void Torch::setBrightness(int val)
 {
     m_brightness = val;
@@ -106,7 +143,7 @@ void Torch::p_strobotimerTimeout()
 
 void Torch::p_brightness(int level)
 {
-    int fd = open("/sys/class/leds/led:flash_torch/brightness", O_WRONLY);
+    int fd = open(m_controlPath.toLocal8Bit().constData(), O_WRONLY);
     int tmp;
     Q_UNUSED(tmp)
 
@@ -121,4 +158,70 @@ void Torch::p_brightness(int level)
         close(fd);
     }
     QThread::msleep(10);
+}
+
+void Torch::checkDevice()
+{
+    int res = false;
+
+    if (!QDBusConnection::systemBus().isConnected())
+    {
+        qDebug() << "Cannot connect to the D-Bus systemBus" << QDBusConnection::systemBus().lastError().message();
+        return;
+    }
+
+
+    QDBusInterface ssuCall("org.nemo.ssu", "/org/nemo/ssu", "org.nemo.ssu", QDBusConnection::systemBus());
+    ssuCall.setTimeout(1000);
+
+    QList<QVariant> args;
+    args.append(2);
+
+    QDBusMessage ssuCallReply = ssuCall.callWithArgumentList(QDBus::Block, "displayName", args);
+
+    if (ssuCallReply.type() == QDBusMessage::ErrorMessage)
+    {
+        qDebug() << "Error" << ssuCallReply.errorMessage();
+        return;
+    }
+
+    QList<QVariant> outArgs = ssuCallReply.arguments();
+    if (outArgs.count() == 0)
+    {
+        qDebug() << "Reply is epmty";
+        return;
+    }
+
+    qDebug() << "device name is" << outArgs.at(0).toString();
+
+    m_deviceName = outArgs.at(0).toString();
+
+    if (m_deviceName == "JP-1301") /* The one and only original Jolla phone */
+    {
+        m_hasBrightness = false;
+        m_controlPath = "/sys/kernel/debug/flash_adp1650/mode";
+
+        res = true;
+    }
+    else if (m_deviceName == "onyx") /* OneplusX */
+    {
+        m_hasBrightness = true;
+        m_controlPath = "/sys/class/leds/led:flash_torch/brightness";
+
+        res = true;
+    }
+    else if (m_deviceName == "fp2-sibon")
+    {
+        m_hasBrightness = true;
+        m_controlPath = "/sys/class/leds/led:flash_torch/brightness";
+
+        res = true;
+    }
+
+    emit deviceNameChanged(m_deviceName);
+
+    m_deviceSupported = res;
+    emit deviceSupportedChanged(m_deviceSupported);
+
+    emit hasBrightnessChanged(m_hasBrightness);
 }
